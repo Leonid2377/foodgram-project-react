@@ -170,6 +170,3 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         context = {'request': request}
         return RecipeRepresentationSerializer(
             instance.recipe, context=context).data
-
-
-
