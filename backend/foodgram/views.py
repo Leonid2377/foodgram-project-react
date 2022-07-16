@@ -12,7 +12,6 @@ from rest_framework.response import Response
 
 from .models import Tag, Recipe, Ingredient, FavoriteList, ShoppingList
 from .filters import RecipeFilter
-
 from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.serializers import TagSerializer, RecipeViewSerializerGet,\
     IngredientSerializer, FavoriteRecipeSerializer, ShoppingListSerializer
@@ -21,13 +20,13 @@ from api.serializers import TagSerializer, RecipeViewSerializerGet,\
 User = get_user_model()
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet): # OK
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [AllowAny]
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):  # OK
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
@@ -35,56 +34,44 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):  # OK
     search_fields = ('name',)
 
 
-class RecipeViewSet(viewsets.ModelViewSet): # OK
+class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     permission_classes = [IsAdminOrAuthorOrReadOnly]
 
+    def main(self, request, pk, act, serialize):
+        if request.method == 'POST':
+            data = {'user': request.user.id, 'recipe': pk}
+            serializer = serialize(
+                data=data,
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            user = request.user
+            recipe = get_object_or_404(Recipe, id=pk)
+            favorite = get_object_or_404(
+                act, user=user, recipe=recipe
+            )
+            favorite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post', 'delete'], detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk):
-        if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = FavoriteRecipeSerializer(
-                data=data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            favorite = get_object_or_404(
-                FavoriteList, user=user, recipe=recipe
-            )
-            favorite.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return None
+        self.main(request=request, pk=pk,
+                  act=FavoriteList,
+                  serialize=FavoriteRecipeSerializer)
 
     @action(methods=['post', 'delete'], detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingListSerializer(
-                data=data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            favorite = get_object_or_404(
-                ShoppingList, user=user, recipe=recipe
-            )
-            favorite.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
+        self.main(request=request, pk=pk,
+                  act=ShoppingList,
+                  serialize=ShoppingListSerializer)
 
     @action(detail=False,  methods=['get'])
     def download_shopping_cart(self, request):
