@@ -24,7 +24,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    """Ингридиенты"""
+    """Ингредиенты"""
     title = models.CharField(max_length=200, unique=True, verbose_name='Название')
     measurement_unit = models.CharField(
         max_length=200,
@@ -87,7 +87,7 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE,
-        related_name='Ингридиенты в рецепте'
+        related_name='Ингредиенты в рецепте'
     )
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE,
@@ -107,7 +107,7 @@ class RecipeIngredient(models.Model):
         ]
 
     def __str__(self):
-        return f'Ингридиент {self.ingredient.name}' \
+        return f'Ингредиент {self.ingredient.name}' \
                f' содержится в рецепте {self.recipe.name}'
 
 

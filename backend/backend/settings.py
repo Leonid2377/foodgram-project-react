@@ -151,3 +151,5 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
 } 
+
+PAGE_SIZE = 6
