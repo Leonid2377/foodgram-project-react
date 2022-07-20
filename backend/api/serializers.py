@@ -1,10 +1,10 @@
 from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from foodgram.models import Tag, Ingredient, ShoppingList, Recipe, Subscription, FavoriteList, RecipeIngredient
 from rest_framework.validators import UniqueTogetherValidator
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
+from foodgram.models import Tag, Ingredient, ShoppingList, Recipe, Subscription, FavoriteList, RecipeIngredient
 from users.model import Follow
 
 
@@ -93,12 +93,7 @@ class FollowListSerializer(serializers.ModelSerializer):
             recipes, many=True, context=context).data
 
     def get_recipes_count(self, obj):
-        user_count = serializers.ReadOnlyField(source='recipes.count')
-        # user_count = serializers.IntegerField(
-        #     source='user_set.count',
-        #     read_only=True
-        # )
-        return user_count
+        return serializers.ReadOnlyField(source='recipes.count')
 
 
 class UserFollowSerializer(serializers.ModelSerializer):
@@ -190,17 +185,17 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             ingredient_id = ingredient['id']
             if ingredient_id in ingredients_list:
                 raise serializers.ValidationError({
-                    'Ингридиент уже есть'
+                    'Ингредиент уже есть'
                 })
             ingredients_list.append(ingredient_id)
             amount = ingredient['amount']
             if int(amount) <= 0:
                 raise serializers.ValidationError({
-                    'Выберите хотя бы один ингридиент'
+                    'Выберите хотя бы один ингредиент'
                 })
             if not ingredients:
                 raise serializers.ValidationError(
-                    'Выберите хотя бы один ингридиент')
+                    'Выберите хотя бы один ингредиент')
         tags = self.initial_data.get('tags')
         if not tags:
             raise serializers.ValidationError({
@@ -231,20 +226,20 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
             amount = ingredient['amount']
-            RecipeIngredient.objects.create(
-                recipe=recipe, ingredient=ingredient_id, amount=amount
-            )
 
-    def create_tags(self, tags, recipe):
-        for tag in tags:
-            recipe.tags.add(tag)
+            RecipeIngredient.objects.bulk_create([
+                RecipeIngredient(
+                    recipe=recipe,
+                    ingredient=ingredient_id,
+                    amount=amount)
+            ])
 
     def create(self, validated_data):
         author = self.context.get('request').user
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(author=author, **validated_data)
-        self.create_tags(tags, recipe)
+        recipe.tags.set(tags)  # вот так сделал, def create_tags - сократил
         self.create_ingredients(ingredients, recipe)
         return recipe
 
