@@ -76,7 +76,6 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -87,7 +86,6 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE,
-        related_name='Ингредиенты в рецепте'
     )
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE,
@@ -181,40 +179,40 @@ class FavoriteList(models.Model):
         return f'{self.user} - {self.recipe} - {self.date_created}'
 
 
-class Subscription(models.Model):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Подписчик'
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Автор рецептов'
-    )
-    date_created = models.DateTimeField(
-        verbose_name='Дата создания',
-        auto_now_add=True,
-        db_index=True
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_following'
-            )
-        ]
-        ordering = ['-date_created']
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-
-    def __str__(self):
-        return (
-            f'{self.date_created} '
-            f'- {self.user.username} '
-            f'подписался на {self.author.username}'
-        )
+# class Subscription(models.Model):
+#
+#     user = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name='follower',
+#         verbose_name='Подписчик'
+#     )
+#     author = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name='following',
+#         verbose_name='Автор рецептов'
+#     )
+#     date_created = models.DateTimeField(
+#         verbose_name='Дата создания',
+#         auto_now_add=True,
+#         db_index=True
+#     )
+#
+#     class Meta:
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['user', 'author'],
+#                 name='unique_following'
+#             )
+#         ]
+#         ordering = ['-date_created']
+#         verbose_name = 'Подписка'
+#         verbose_name_plural = 'Подписки'
+#
+#     def __str__(self):
+#         return (
+#             f'{self.date_created} '
+#             f'- {self.user.username} '
+#             f'подписался на {self.author.username}'
+#         )

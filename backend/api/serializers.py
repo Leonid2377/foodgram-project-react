@@ -4,8 +4,9 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
-from foodgram.models import Tag, Ingredient, ShoppingList, Recipe, Subscription, FavoriteList, RecipeIngredient
-from users.model import Follow
+from foodgram.models import Tag, Ingredient, ShoppingList, Recipe, FavoriteList, RecipeIngredient
+# Subscribe
+from users.models import Follow
 
 
 User = get_user_model()
