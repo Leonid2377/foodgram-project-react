@@ -9,7 +9,7 @@ services:
       - ./.env
 
   backend:
-    image: leonid2377/backend:latest
+    image: leonid2377/backendV1:latest
     restart: always
     volumes:
       - static_value:/app/static/
