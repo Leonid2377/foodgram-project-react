@@ -1,11 +1,11 @@
 from drf_extra_fields.fields import Base64ImageField
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from foodgram.models import Tag, Ingredient, ShoppingList, Recipe, FavoriteList, RecipeIngredient
-# Subscribe
+
 from users.models import Follow
 
 
@@ -35,10 +35,17 @@ class RecipeUserSerializer(
             'first_name', 'last_name', 'is_subscribed')
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        fields = (
+            'id', 'email', 'username',
+            'first_name', 'last_name', 'password',)
+
+    def validate_password(self, password):
+        validators.validate_password(password)
+        return password
 
 
 class CustomUserSerializer(UserSerializer):

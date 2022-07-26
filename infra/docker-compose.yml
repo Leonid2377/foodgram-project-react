@@ -1,6 +1,6 @@
 version: '3.8'
-
 services:
+
   db:
     image: postgres:13.0-alpine
     volumes:
@@ -9,11 +9,11 @@ services:
       - ./.env
 
   backend:
-    image: leonid2377/backendv2:latest
+    image: leonid2377/backendv1:latest
     restart: always
     volumes:
       - data_value:/code/data/
-      - static_value:/code/static/
+      - static_value:/code/staticfiles/
       - media_value:/code/media/
     depends_on:
       - db
@@ -21,13 +21,13 @@ services:
       - ./.env
 
   frontend:
-    image: leonid2377/frontend:latest
+    image: leonid2377/frontendv3:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - backend
 
- nginx:
+  nginx:
     image: nginx:1.19.3
     ports:
       - 80:80
@@ -36,7 +36,7 @@ services:
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
-      - static_value:/var/html/static/
+      - static_value:/var/html/staticfiles/
       - media_value:/var/html/media/
     depends_on:
       - frontend
