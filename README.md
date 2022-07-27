@@ -29,11 +29,11 @@ IP 84.201.142.74 (на стадии доработки)
   ```
   
   ```
-  docker-compose exec web python manage.py createsuperuser
+  sudo docker-compose exec web python manage.py createsuperuser
   ```
   
   ```
-  docker-compose exec web python manage.py collectstatic --no-input
+  sudo docker-compose exec web python manage.py collectstatic --no-input
   ```
 
 > остановить проект: `docker-compose down -v`
